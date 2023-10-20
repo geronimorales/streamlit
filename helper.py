@@ -162,12 +162,12 @@ def play_webcam(conf, model):
 
     webrtc_streamer(
         key="example",
-        video_transformer_factory=lambda: MyVideoTransformer(conf, model),
+        video_processor_factory=lambda: MyVideoTransformer(conf, model),
         rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
         media_stream_constraints={"video": True, "audio": False},
     )
 
-class MyVideoTransformer(VideoTransformerBase):
+class MyVideoTransformer(VideoProcessorBase):
     def __init__(self, conf, model):
         self.conf = conf
         self.model = model
@@ -176,6 +176,8 @@ class MyVideoTransformer(VideoTransformerBase):
         image = frame.to_ndarray(format="bgr24")
         processed_image = self._display_detected_frames(image)
         st.image(processed_image, caption='Detected Video', channels="BGR", use_column_width=True)
+
+        return av.VideoFrame.from_ndarray(processed_image, format="bgr24")
 
     def _display_detected_frames(self, image):
         orig_h, orig_w = image.shape[0:2]
